@@ -15,7 +15,7 @@ import quyet.electronic_commerce.repository.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Component
+// @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j

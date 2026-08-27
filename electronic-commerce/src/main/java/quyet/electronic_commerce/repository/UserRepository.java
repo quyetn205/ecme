@@ -21,4 +21,6 @@ boolean existsByUsername(String username);
     @Modifying
     @Query(value = "DELETE from user_roles where roles_name=:roleName",nativeQuery = true)
     void removeRoleLinks(String roleName);
+    
+    long countByCreatedAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 }

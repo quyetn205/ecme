@@ -13,6 +13,9 @@ import quyet.electronic_commerce.dto.response.DashboardSummaryResponse;
 import quyet.electronic_commerce.dto.response.DailyRevenueResponse;
 import quyet.electronic_commerce.dto.response.OrderResponse;
 import quyet.electronic_commerce.service.IDashboardService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -26,18 +29,22 @@ public class DashboardController {
     @Operation(summary = "Lấy thống kê tổng quan Dashboard")
     @GetMapping("/summary")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
-    public APIResponse<DashboardSummaryResponse> getSummary() {
+    public APIResponse<DashboardSummaryResponse> getSummary(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return APIResponse.<DashboardSummaryResponse>builder()
-                .result(dashboardService.getSummary())
+                .result(dashboardService.getSummary(startDate, endDate))
                 .build();
     }
 
-    @Operation(summary = "Lấy biểu đồ doanh thu 7 ngày qua")
+    @Operation(summary = "Lấy biểu đồ doanh thu theo khoảng thời gian (hoặc 7 ngày qua nếu không truyền)")
     @GetMapping("/revenue-chart")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLOYEE')")
-    public APIResponse<List<DailyRevenueResponse>> getDailyRevenue() {
+    public APIResponse<List<DailyRevenueResponse>> getDailyRevenue(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return APIResponse.<List<DailyRevenueResponse>>builder()
-                .result(dashboardService.getDailyRevenue())
+                .result(dashboardService.getDailyRevenue(startDate, endDate))
                 .build();
     }
 

@@ -7,7 +7,7 @@ import quyet.electronic_commerce.dto.response.OrderResponse;
 import java.util.List;
 
 public interface IDashboardService {
-    DashboardSummaryResponse getSummary();
-    List<DailyRevenueResponse> getDailyRevenue();
+    DashboardSummaryResponse getSummary(java.time.LocalDate startDate, java.time.LocalDate endDate);
+    List<DailyRevenueResponse> getDailyRevenue(java.time.LocalDate startDate, java.time.LocalDate endDate);
     List<OrderResponse> getRecentOrders();
 }

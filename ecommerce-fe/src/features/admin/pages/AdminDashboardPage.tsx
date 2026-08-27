@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Users, Package, ShoppingBag, TrendingUp, Loader2, ArrowRight } from 'lucide-react';
 import { useDashboardSummary } from '@/features/admin/hooks/useDashboardSummary';
 import { useRevenueChart } from '@/features/admin/hooks/useRevenueChart';
@@ -46,8 +47,11 @@ function StatCardSkeleton() {
 }
 
 export default function AdminDashboardPage() {
-    const { data: summaryData, isLoading: isLoadingSummary, isError: isErrorSummary } = useDashboardSummary();
-    const { data: chartData, isLoading: isLoadingChart } = useRevenueChart();
+    const [startDate, setStartDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
+
+    const { data: summaryData, isLoading: isLoadingSummary, isError: isErrorSummary } = useDashboardSummary(startDate, endDate);
+    const { data: chartData, isLoading: isLoadingChart } = useRevenueChart(startDate, endDate);
     const { data: recentOrders, isLoading: isLoadingOrders } = useRecentOrders();
 
     const cards: StatCard[] = [
@@ -88,11 +92,46 @@ export default function AdminDashboardPage() {
     return (
         <div>
             {/* Header */}
-            <div className='mb-8'>
-                <h1 className='text-2xl font-bold text-gray-900'>Dashboard</h1>
-                <p className='mt-1 text-sm text-gray-500'>
-                    Tổng quan hoạt động của hệ thống
-                </p>
+            <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+                <div>
+                    <h1 className='text-2xl font-bold text-gray-900'>Dashboard</h1>
+                    <p className='mt-1 text-sm text-gray-500'>
+                        Tổng quan hoạt động của hệ thống
+                    </p>
+                </div>
+                
+                {/* Lọc thời gian */}
+                <div className='flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-2 shadow-sm'>
+                    <div className='flex items-center gap-2'>
+                        <label htmlFor='startDate' className='text-sm text-gray-600'>Từ:</label>
+                        <input
+                            type='date'
+                            id='startDate'
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className='rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500'
+                        />
+                    </div>
+                    <span className='text-gray-300'>|</span>
+                    <div className='flex items-center gap-2'>
+                        <label htmlFor='endDate' className='text-sm text-gray-600'>Đến:</label>
+                        <input
+                            type='date'
+                            id='endDate'
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className='rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500'
+                        />
+                    </div>
+                    {(startDate || endDate) && (
+                        <button 
+                            onClick={() => { setStartDate(''); setEndDate(''); }}
+                            className='ml-2 text-xs font-medium text-red-500 hover:text-red-700'
+                        >
+                            Xóa lọc
+                        </button>
+                    )}
+                </div>
             </div>
 
             {isErrorSummary && (
@@ -158,7 +197,9 @@ export default function AdminDashboardPage() {
                 {/* Revenue Chart */}
                 <div className='lg:col-span-2 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm'>
                     <div className='mb-4 flex items-center justify-between'>
-                        <h2 className='text-lg font-semibold text-gray-900'>Doanh thu 7 ngày qua</h2>
+                        <h2 className='text-lg font-semibold text-gray-900'>
+                            Doanh thu {startDate || endDate ? 'theo khoảng thời gian' : '7 ngày qua'}
+                        </h2>
                     </div>
                     <div className='h-72 w-full'>
                         {isLoadingChart ? (

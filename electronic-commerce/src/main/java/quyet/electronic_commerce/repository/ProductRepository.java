@@ -34,4 +34,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
                                   @Param("minPrice") Float minPrice,
                                   @Param("maxPrice") Float maxPrice,
                                   Pageable pageable);
+
+    long countByCreatedAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 }

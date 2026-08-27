@@ -9,13 +9,18 @@ export interface DashboardSummary {
     totalRevenue: number;
 }
 
-export const useDashboardSummary = () => {
+export const useDashboardSummary = (startDate?: string, endDate?: string) => {
     return useQuery({
-        queryKey: ['dashboard-summary'],
+        queryKey: ['dashboard-summary', startDate, endDate],
         queryFn: async () => {
-            const res = await httpClient.get<APIResponse<DashboardSummary>>(
-                '/dashboard/summary'
-            );
+            const params = new URLSearchParams();
+            if (startDate) params.append('startDate', startDate);
+            if (endDate) params.append('endDate', endDate);
+            
+            const queryString = params.toString();
+            const url = `/dashboard/summary${queryString ? `?${queryString}` : ''}`;
+            
+            const res = await httpClient.get<APIResponse<DashboardSummary>>(url);
             return res.data.result;
         }
     });

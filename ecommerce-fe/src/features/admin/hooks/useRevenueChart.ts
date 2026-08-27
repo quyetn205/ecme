@@ -7,13 +7,18 @@ export interface DailyRevenue {
     revenue: number;
 }
 
-export const useRevenueChart = () => {
+export const useRevenueChart = (startDate?: string, endDate?: string) => {
     return useQuery({
-        queryKey: ['dashboard-revenue-chart'],
+        queryKey: ['dashboard-revenue-chart', startDate, endDate],
         queryFn: async () => {
-            const res = await httpClient.get<APIResponse<DailyRevenue[]>>(
-                '/dashboard/revenue-chart'
-            );
+            const params = new URLSearchParams();
+            if (startDate) params.append('startDate', startDate);
+            if (endDate) params.append('endDate', endDate);
+            
+            const queryString = params.toString();
+            const url = `/dashboard/revenue-chart${queryString ? `?${queryString}` : ''}`;
+            
+            const res = await httpClient.get<APIResponse<DailyRevenue[]>>(url);
             return res.data.result;
         }
     });

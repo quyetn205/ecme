@@ -31,14 +31,26 @@ public class DashboardService implements IDashboardService {
     OrderRepository orderRepository;
     OrderMapper orderMapper;
 
-    @Cacheable(value = "dashboard-summary")
+    @Cacheable(value = "dashboard-summary", key = "{#startDate, #endDate}")
     @Override
-    public DashboardSummaryResponse getSummary() {
+    public DashboardSummaryResponse getSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            return DashboardSummaryResponse.builder()
+                    .totalUsers(userRepository.count())
+                    .totalProducts(productRepository.count())
+                    .totalOrders(orderRepository.count())
+                    .totalRevenue(orderRepository.calculateTotalRevenue())
+                    .build();
+        }
+
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59);
+
         return DashboardSummaryResponse.builder()
-                .totalUsers(userRepository.count())
-                .totalProducts(productRepository.count())
-                .totalOrders(orderRepository.count())
-                .totalRevenue(orderRepository.calculateTotalRevenue())
+                .totalUsers(userRepository.countByCreatedAtBetween(start, end))
+                .totalProducts(productRepository.countByCreatedAtBetween(start, end))
+                .totalOrders(orderRepository.countByOrderDateBetween(start, end))
+                .totalRevenue(orderRepository.calculateTotalRevenueBetween(start, end))
                 .build();
     }
 
@@ -52,21 +64,32 @@ public class DashboardService implements IDashboardService {
     }
 
     @Override
-    public List<DailyRevenueResponse> getDailyRevenue() {
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(6);
-        List<Orders> recentOrders = orderRepository.findOrdersByOrderDateAfter(sevenDaysAgo.withHour(0).withMinute(0));
+    public List<DailyRevenueResponse> getDailyRevenue(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        LocalDateTime start, end;
+        if (startDate == null || endDate == null) {
+            end = LocalDateTime.now();
+            start = end.minusDays(6).withHour(0).withMinute(0).withSecond(0);
+        } else {
+            start = startDate.atStartOfDay();
+            end = endDate.atTime(23, 59, 59);
+        }
+
+        List<Orders> recentOrders = orderRepository.findOrdersByOrderDateBetween(start, end);
 
         Map<String, Double> revenueByDate = recentOrders.stream()
-                .filter(o -> !"CANCELLED".equals(o.getStatus()))
+                .filter(o -> "DELIVERED".equals(o.getStatus()) || "COMPLETED".equals(o.getStatus()))
                 .collect(Collectors.groupingBy(
                         o -> o.getOrderDate().format(DateTimeFormatter.ofPattern("dd/MM")),
                         Collectors.summingDouble(Orders::getTotalPrice)
                 ));
 
         List<DailyRevenueResponse> response = new ArrayList<>();
-        for (int i = 6; i >= 0; i--) {
-            String dateStr = LocalDateTime.now().minusDays(i).format(DateTimeFormatter.ofPattern("dd/MM"));
+        // Lặp từ ngày bắt đầu đến ngày kết thúc
+        LocalDateTime current = start;
+        while (!current.isAfter(end)) {
+            String dateStr = current.format(DateTimeFormatter.ofPattern("dd/MM"));
             response.add(new DailyRevenueResponse(dateStr, revenueByDate.getOrDefault(dateStr, 0.0).floatValue()));
+            current = current.plusDays(1);
         }
 
         return response;
