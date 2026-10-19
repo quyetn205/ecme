@@ -76,9 +76,11 @@ public class CartService implements ICartService {
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt=(Jwt)authentication.getPrincipal();
         Long userId=jwt.getClaim("userId");
-        Cart cart=cartRepository.findByUserId(userId)
-                .orElseThrow(()->new AppException(ErrorCode.NOT_PRODUCT_EXISTED));
-        List<CartItem> cartItems=cartItemRepository.findByCartId(cart.getId());
+        var optionalCart = cartRepository.findByUserId(userId);
+        if (optionalCart.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        List<CartItem> cartItems=cartItemRepository.findByCartId(optionalCart.get().getId());
 
         return cartItems.stream().map(cartItemMapper::toResponse).toList();
     }
@@ -95,15 +97,31 @@ public class CartService implements ICartService {
         if(!cartItem.getCart().getUser().getId().equals(userId)){
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        if(cartItem.getProduct().getStockQuantity()<quantity){
-            throw new AppException(ErrorCode.OUT_OF_STOCK);
-        }
-        //ếu quantity = 0 hoặc âm ,xóa luôn Item đó
+        // Nếu quantity <= 0, xóa luôn Item đó
         if(quantity<=0){
             cartItemRepository.delete(cartItem);
             return null;
         }
+        if(cartItem.getProduct().getStockQuantity()<quantity){
+            throw new AppException(ErrorCode.OUT_OF_STOCK);
+        }
         cartItem.setQuantity(quantity);
         return cartItemMapper.toResponse(cartItemRepository.save(cartItem));
     }
+
+    @Transactional
+    @Override
+    public void deleteCartItem(Long id) {
+        CartItem cartItem=cartItemRepository.findById(id)
+                .orElseThrow(()->new AppException(ErrorCode.NOT_PRODUCT_EXISTED));
+
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        Jwt jwt=(Jwt)authentication.getPrincipal();
+        Long userId=jwt.getClaim("userId");
+        if(!cartItem.getCart().getUser().getId().equals(userId)){
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        cartItemRepository.delete(cartItem);
+    }
 }
+

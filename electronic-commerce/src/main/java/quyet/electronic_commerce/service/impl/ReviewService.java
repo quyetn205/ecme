@@ -62,7 +62,9 @@ public class ReviewService implements IReviewService {
 
     @Override
     public PageResponse<ReviewResponse> getReviewsByProduct(Long productId, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+        int pageIndex = Math.max(0, page - 1);
+        int pageSize = Math.max(1, size);
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Review> reviewPage = reviewRepository.findByProductIdOrderByCreatedAtDesc(productId, pageable);
 
         List<ReviewResponse> content = reviewPage.getContent().stream()

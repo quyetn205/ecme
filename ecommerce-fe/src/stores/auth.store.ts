@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { UserResponse } from '@/types';
 import { getToken, setToken, clearToken } from '@/utils/token';
 import { getRolesFromToken } from '@/utils/jwt';
+import { authService } from '@/services';
 
 interface AuthState {
     token: string | null;
@@ -39,6 +40,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     logout: () => {
+        // Call backend to clear refresh token cookie (fire-and-forget)
+        authService.logout().catch(() => {
+            // Ignore errors — we're logging out anyway
+        });
         clearToken();
         set({
             token: null,
@@ -63,3 +68,4 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
     }
 }));
+

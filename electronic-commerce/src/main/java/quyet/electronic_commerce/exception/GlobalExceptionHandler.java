@@ -19,6 +19,15 @@ public class GlobalExceptionHandler{
         response.setMessage(errorCode.getMessage());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
+    @ExceptionHandler(value = org.springframework.security.access.AccessDeniedException.class)
+    ResponseEntity<APIResponse> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException exception) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        APIResponse response = new APIResponse();
+        response.setCode(errorCode.getCode());
+        response.setMessage("Access denied: You do not have permission to perform this action");
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<APIResponse> handleException(Exception exception){
         log.error("Unhandled exception:",exception);

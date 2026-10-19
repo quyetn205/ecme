@@ -9,4 +9,6 @@ public interface ICartService {
     CartItemResponse addToCart(CartItemRequest request);
     List<CartItemResponse> getCartItems();
     CartItemResponse updateQuantity(Long id,Integer quantity);
+    void deleteCartItem(Long id);
 }
+

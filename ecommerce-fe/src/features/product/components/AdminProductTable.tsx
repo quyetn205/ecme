@@ -59,39 +59,68 @@ export default function AdminProductTable({
                         {products.map((product) => (
                             <tr key={product.id} className='hover:bg-gray-50'>
                                 <td className='px-4 py-3'>
-                                    {product.image ? (
-                                        <img
-                                            src={product.image}
-                                            alt={product.name}
-                                            className='h-12 w-12 rounded-md object-cover'
-                                        />
-                                    ) : (
-                                        <div className='flex h-12 w-12 items-center justify-center rounded-md bg-gray-200 text-xs text-gray-500'>
-                                            N/A
-                                        </div>
-                                    )}
+                                    <div className='h-12 w-12 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 shrink-0'>
+                                        {product.image ? (
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className='h-full w-full object-cover'
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80?text=SP';
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className='flex h-full w-full items-center justify-center text-xs text-gray-400 font-medium'>
+                                                N/A
+                                            </div>
+                                        )}
+                                    </div>
                                 </td>
-                                <td className='px-4 py-3 text-sm font-medium text-gray-900'>
+                                <td className='px-4 py-3 text-sm font-semibold text-gray-900'>
                                     {product.name}
                                 </td>
-                                <td className='px-4 py-3 text-sm text-gray-600'>
-                                    {product.category?.name || '-'}
+                                <td className='px-4 py-3'>
+                                    {product.category?.name ? (
+                                        <span className='inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-100'>
+                                            {product.category.name}
+                                        </span>
+                                    ) : (
+                                        <span className='text-xs text-gray-400 italic'>Chưa phân loại</span>
+                                    )}
                                 </td>
-                                <td className='px-4 py-3 text-sm text-gray-600'>
+                                <td className='px-4 py-3 text-sm font-bold text-gray-900'>
                                     {formatCurrency(product.price)}
                                 </td>
+
                                 <td className='px-4 py-3'>
                                     <span
                                         className={cn(
-                                            'inline-flex rounded-full px-2.5 py-1 text-xs font-medium',
-                                            product.quantity > 0
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-100 text-red-700'
+                                            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold',
+                                            product.quantity <= 0
+                                                ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                                : product.quantity <= 5
+                                                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                         )}
                                     >
-                                        {product.quantity}
+                                        <span
+                                            className={cn(
+                                                'h-1.5 w-1.5 rounded-full',
+                                                product.quantity <= 0
+                                                    ? 'bg-rose-500'
+                                                    : product.quantity <= 5
+                                                      ? 'bg-amber-500'
+                                                      : 'bg-emerald-500'
+                                            )}
+                                        />
+                                        {product.quantity <= 0
+                                            ? 'Hết hàng'
+                                            : product.quantity <= 5
+                                              ? `Sắp hết (${product.quantity})`
+                                              : `Còn ${product.quantity}`}
                                     </span>
                                 </td>
+
                                 <td className='px-4 py-3'>
                                     <div className='flex justify-end gap-2'>
                                         <button

@@ -22,7 +22,7 @@ public enum ErrorCode {
     ACCOUNT_DISABLED(1014, "account disabled", HttpStatus.BAD_REQUEST),
     OUT_OF_STOCK(1015, "out of stock", HttpStatus.BAD_REQUEST),
     NOT_PRODUCT_EXISTED(1016, "not product existed", HttpStatus.BAD_REQUEST),
-    UNAUTHORIZED(1017, "unauthorized", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED(1017, "unauthorized", HttpStatus.FORBIDDEN),
     CART_EMPTY(1018, "cart empty", HttpStatus.BAD_REQUEST),
     ORDER_NOT_EXISTED(1019, "order not existed", HttpStatus.BAD_REQUEST),
     NO(1020, "no", HttpStatus.BAD_REQUEST),

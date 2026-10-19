@@ -109,7 +109,7 @@ export default function AdminDashboardPage() {
                             id='startDate'
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className='rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500'
+                            className='rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500'
                         />
                     </div>
                     <span className='text-gray-300'>|</span>
@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
                             id='endDate'
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className='rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500'
+                            className='rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500'
                         />
                     </div>
                     {(startDate || endDate) && (
@@ -251,7 +251,7 @@ export default function AdminDashboardPage() {
                 <div className='rounded-2xl border border-gray-100 bg-white p-6 shadow-sm'>
                     <div className='mb-4 flex items-center justify-between'>
                         <h2 className='text-lg font-semibold text-gray-900'>Đơn hàng gần đây</h2>
-                        <Link to={ROUTE_PATH.ADMIN_ORDERS} className='flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700'>
+                        <Link to={ROUTE_PATH.ADMIN_ORDERS} className='flex items-center text-sm font-medium text-blue-600 hover:text-blue-700'>
                             Xem tất cả <ArrowRight className='ml-1 h-4 w-4' />
                         </Link>
                     </div>
@@ -267,7 +267,7 @@ export default function AdminDashboardPage() {
                             recentOrders?.map((order) => (
                                 <div key={order.id} className='flex items-center justify-between'>
                                     <div className='flex items-center gap-3'>
-                                        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600'>
+                                        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600'>
                                             <ShoppingBag className='h-5 w-5' />
                                         </div>
                                         <div>

@@ -1,6 +1,7 @@
 package quyet.electronic_commerce.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -13,8 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import quyet.electronic_commerce.dto.request.AuthenticationRequest;
 import quyet.electronic_commerce.dto.response.APIResponse;
 import quyet.electronic_commerce.dto.response.AuthenticationResponse;
+import quyet.electronic_commerce.exception.AppException;
+import quyet.electronic_commerce.exception.ErrorCode;
 import quyet.electronic_commerce.service.IAuthenticationService;
 import quyet.electronic_commerce.service.impl.GoogleAuthService;
+import quyet.electronic_commerce.service.impl.JwtService;
+import quyet.electronic_commerce.util.CookieUtils;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -28,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 public class AuthenticationController {
     IAuthenticationService authenticationService;
     GoogleAuthService googleAuthService;
+    JwtService jwtService;
 
     @NonFinal
     @Value("${google.client-id}")
@@ -45,11 +51,40 @@ public class AuthenticationController {
     @Value("${app.frontend-url}")
     String frontendUrl;
 
-    @Operation(summary = "Authenticate user", description = "API authenticate user and return JWT token")
+    @Operation(summary = "Authenticate user", description = "API authenticate user and return JWT token. Refresh token is set as HttpOnly cookie.")
     @PostMapping("/token")
-    APIResponse<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
+    APIResponse<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request,
+                                                      HttpServletResponse response) {
         var result = authenticationService.authenticate(request);
+
+        // Set refresh token as HttpOnly cookie
+        CookieUtils.addRefreshTokenCookie(response, result.getRefreshToken(), jwtService.getRefreshableDuration());
+
         return APIResponse.<AuthenticationResponse>builder().result(result).build();
+    }
+
+    @Operation(summary = "Refresh access token", description = "Exchange refresh token (from cookie) for a new access token")
+    @PostMapping("/refresh")
+    APIResponse<AuthenticationResponse> refreshToken(HttpServletRequest request,
+                                                      HttpServletResponse response) {
+        String refreshToken = CookieUtils.getRefreshTokenFromCookies(request);
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        var result = authenticationService.refreshToken(refreshToken);
+
+        // Rotate: set new refresh token cookie
+        CookieUtils.addRefreshTokenCookie(response, result.getRefreshToken(), jwtService.getRefreshableDuration());
+
+        return APIResponse.<AuthenticationResponse>builder().result(result).build();
+    }
+
+    @Operation(summary = "Logout", description = "Clear refresh token cookie")
+    @PostMapping("/logout")
+    APIResponse<Void> logout(HttpServletResponse response) {
+        CookieUtils.clearRefreshTokenCookie(response);
+        return APIResponse.<Void>builder().build();
     }
 
     @Operation(summary = "Initiate Google Login", description = "Redirect user to Google consent screen")
@@ -81,6 +116,11 @@ public class AuthenticationController {
 
         try {
             AuthenticationResponse authResponse = googleAuthService.loginWithGoogle(code);
+
+            // Set refresh token as HttpOnly cookie before redirecting
+            CookieUtils.addRefreshTokenCookie(response, authResponse.getRefreshToken(), jwtService.getRefreshableDuration());
+
+            // Only pass access token via URL
             String token = URLEncoder.encode(authResponse.getToken(), StandardCharsets.UTF_8);
             response.sendRedirect(frontendUrl + "/auth/callback?token=" + token);
         } catch (Exception e) {

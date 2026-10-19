@@ -45,4 +45,13 @@ public class CartController {
                 .build();
     }
 
+    @Operation(summary = "delete cart item" , description = "API delete cart item")
+    @DeleteMapping("/item/{id}")
+    APIResponse<Void> deleteCartItem(@PathVariable Long id) {
+        cartService.deleteCartItem(id);
+        return APIResponse.<Void>builder()
+                .message("delete item successfully")
+                .build();
+    }
 }
+

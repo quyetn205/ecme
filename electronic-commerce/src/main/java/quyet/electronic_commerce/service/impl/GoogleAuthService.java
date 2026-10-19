@@ -79,11 +79,13 @@ public class GoogleAuthService {
         // Step 3: Find or create user
         User user = findOrCreateUser(userInfo);
 
-        // Step 4: Generate system JWT
-        String token = jwtService.generateToken(user);
+        // Step 4: Generate system JWT (access + refresh)
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
-                .token(token)
+                .token(accessToken)
+                .refreshToken(refreshToken)
                 .authenticated(true)
                 .build();
     }

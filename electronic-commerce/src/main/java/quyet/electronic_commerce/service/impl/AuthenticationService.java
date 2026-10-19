@@ -1,5 +1,6 @@
 package quyet.electronic_commerce.service.impl;
 
+import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,10 +35,39 @@ public class AuthenticationService implements IAuthenticationService {
         if (!authenticated) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-        var token = jwtService.generateToken(user);
+
+        return buildAuthResponse(user);
+    }
+
+    @Override
+    public AuthenticationResponse refreshToken(String refreshToken) {
+        // Verify the refresh token signature and expiration
+        SignedJWT signedJWT = jwtService.verifyToken(refreshToken);
+
+        // Ensure it's actually a refresh token, not an access token
+        if (!jwtService.isRefreshToken(signedJWT)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        // Get user from token subject
+        String username = jwtService.getUsernameFromToken(signedJWT);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (!user.isStatus()) {
+            throw new AppException(ErrorCode.ACCOUNT_DISABLED);
+        }
+
+        return buildAuthResponse(user);
+    }
+
+    private AuthenticationResponse buildAuthResponse(User user) {
+        var accessToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
-                .token(token)
+                .token(accessToken)
+                .refreshToken(refreshToken)
                 .authenticated(true)
                 .build();
     }

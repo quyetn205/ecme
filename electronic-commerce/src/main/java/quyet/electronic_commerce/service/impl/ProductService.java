@@ -155,11 +155,10 @@ public class ProductService implements IProductService {
     @CacheEvict(value = "product", key = "#id")
     @Override
     public ProductResponse deleteProduct(Long id) {
-        if(productRepository.existsById(id)){
-            Product product=productRepository.deleteProductById(id);
-            return productMapper.toResponse(product);
-        }else {
-            throw new AppException(ErrorCode.PRODUCT_NOT_EXISTED);
-        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+        productRepository.delete(product);
+        return productMapper.toResponse(product);
     }
 }
+

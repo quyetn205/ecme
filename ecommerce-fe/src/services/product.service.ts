@@ -29,6 +29,7 @@ export const productService = {
         if (data.description) formData.append('description', data.description);
         formData.append('price', String(data.price));
         formData.append('quantity', String(data.quantity));
+        if (data.categoryId) formData.append('categoryId', String(data.categoryId));
         if (data.image) formData.append('image', data.image);
 
         const response = await httpClient.post<APIResponse<ProductResponse>>(
@@ -47,6 +48,7 @@ export const productService = {
         if (data.description) formData.append('description', data.description);
         formData.append('price', String(data.price));
         formData.append('quantity', String(data.quantity));
+        if (data.categoryId) formData.append('categoryId', String(data.categoryId));
         if (data.image) formData.append('image', data.image);
 
         const response = await httpClient.put<APIResponse<ProductResponse>>(
@@ -58,6 +60,7 @@ export const productService = {
         );
         return response.data;
     },
+
 
     delete: async (id: number) => {
         const response = await httpClient.delete<APIResponse<ProductResponse>>(

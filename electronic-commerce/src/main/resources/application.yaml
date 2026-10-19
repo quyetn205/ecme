@@ -21,10 +21,13 @@ spring:
   data:
     redis:
       url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379}
+      timeout: 1000ms
+      connect-timeout: 1000ms
 
 jwt:
   signerKey: ${JWT_SIGNER_KEY}
-  valid-duration: 3600
+  valid-duration: 300
+  refreshable-duration: 604800
   issuer: "quyet.com"
 
 open:

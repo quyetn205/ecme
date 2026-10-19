@@ -44,7 +44,7 @@ export default function CategoryManagePage() {
                 <button
                     type='button'
                     onClick={handleAdd}
-                    className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700'
+                    className='flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-xs transition-all hover:bg-blue-700 active:scale-95'
                 >
                     <Layers className='h-4 w-4' />
                     Thêm danh mục

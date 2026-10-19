@@ -29,5 +29,13 @@ export const cartService = {
             data
         );
         return response.data;
+    },
+
+    deleteCartItem: async (id: number) => {
+        const response = await httpClient.delete<APIResponse<void>>(
+            API_ENDPOINT.CART.ITEM(id)
+        );
+        return response.data;
     }
 };
+

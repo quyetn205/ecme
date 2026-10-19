@@ -43,26 +43,26 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-    private static final String[] PUBLIC_ENPOINTS={
-        "/users/**","/auth/**","/products/**","/categories/**"
-    };
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
-                .authorizeHttpRequests(request->request
+                .authorizeHttpRequests(request -> request
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/uploads/**").permitAll()
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers(PUBLIC_ENPOINTS).permitAll()
-                                .requestMatchers("/roles/**","/permissions/**").hasRole(RoleEnum.ADMIN.name())
-                                .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/reviews/**").permitAll()
+                        .requestMatchers("/roles/**", "/permissions/**").hasRole(RoleEnum.ADMIN.name())
+                        .anyRequest().authenticated()
                 );
         //kich hoat xac thuc jwt
         http.oauth2ResourceServer(oauth2->oauth2.jwt(jwtConfigurer -> jwtConfigurer

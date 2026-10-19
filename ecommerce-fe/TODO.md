@@ -157,3 +157,13 @@
 - [x] Code-splitting hoạt động:
     - `ProductListPage-DMXj-w5g.js` (5.52 kB)
     - `ProductDetailPage-7gDxu9Db.js` (2.33 kB)
+
+## Giai đoạn 1: Sửa lỗi khẩn cấp (Emergency Bug Fixes) ✅
+
+- [x] 1. `ProductDetailPage.tsx` — sửa `handleAddToCart` gọi mutation `useAddToCart` lưu database thay vì chỉ lưu local store Zustand; thêm loading state cho nút thêm giỏ hàng.
+- [x] 2. `useCart.ts` + `Header.tsx` — hỗ trợ options `enabled` trong `useCart`; hiển thị badge số lượng sản phẩm trên icon giỏ hàng ở Header khi user đăng nhập.
+- [x] 3. `CartService.java` — `getCartItems()` trả về danh sách rỗng `Collections.emptyList()` cho user mới chưa có Cart thay vì throw `NOT_PRODUCT_EXISTED`.
+- [x] 4. `OrderRepository.java` — thêm từ khóa `distinct` vào các truy vấn `left join fetch` để tránh duplicate row các đối tượng Order.
+- [x] 5. `SecurityConfig.java` — thu hẹp `PUBLIC_ENPOINTS`, chỉ cho phép `POST /users/register` và các method GET công khai; các endpoint user/admin khác bắt buộc qua xác thực.
+- [x] 6. `GlobalExceptionHandler.java` + `ErrorCode.java` — thêm handler cho `AccessDeniedException` trả về HTTP 403 Forbidden thay vì lỗi 500; cập nhật `ErrorCode.UNAUTHORIZED` thành `HttpStatus.FORBIDDEN`.
+- [x] 7. Build verification — Backend `mvn compile` exit 0 + Frontend `npm run build` exit 0 (6.87s).

@@ -11,14 +11,14 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Orders,Long> {
 
-    @Query("select o from Orders o " +
+    @Query("select distinct o from Orders o " +
             "left join fetch o.orderItems oi " +
             "left join fetch oi.product " +
             "where o.user.id =:userId " +
             "order by o.orderDate desc ")
     List<Orders> findAllOrdersByUserIdWithDetails(@Param("userId") Long userId);
 
-    @Query("select o from Orders o " +
+    @Query("select distinct o from Orders o " +
             "left join fetch o.orderItems oi " +
             "left join fetch oi.product " +
             "order by o.orderDate desc ")
@@ -30,14 +30,14 @@ public interface OrderRepository extends JpaRepository<Orders,Long> {
     @Query("SELECT COALESCE(SUM(o.totalPrice), 0) FROM Orders o WHERE o.status IN ('DELIVERED', 'COMPLETED') AND o.orderDate >= :startDate AND o.orderDate <= :endDate")
     Float calculateTotalRevenueBetween(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
 
-    @Query("select o from Orders o " +
+    @Query("select distinct o from Orders o " +
             "left join fetch o.orderItems oi " +
             "left join fetch oi.product " +
             "where o.orderDate >= :startDate " +
             "order by o.orderDate asc")
     List<Orders> findOrdersByOrderDateAfter(@Param("startDate") java.time.LocalDateTime startDate);
 
-    @Query("select o from Orders o " +
+    @Query("select distinct o from Orders o " +
             "left join fetch o.orderItems oi " +
             "left join fetch oi.product " +
             "where o.orderDate >= :startDate and o.orderDate <= :endDate " +
